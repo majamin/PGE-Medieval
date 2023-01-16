@@ -27,6 +27,9 @@ class IsometricDemo : public olc::PixelGameEngine
     // Pointer to create 2D world array
     int *pWorld = nullptr;
 
+    // NOTE: used in calculation to select tiles
+    int tilesPerRow;
+
   public:
     bool OnUserCreate() override
     {
@@ -40,6 +43,10 @@ class IsometricDemo : public olc::PixelGameEngine
       for(int i = 0; i < vWorldSize.x * vWorldSize.y; i++) {
         pWorld[i] = 2;
       }
+
+      // calculate how many tiles per row
+      tilesPerRow = (sprIsom->width / vTileSize.x);
+
       return true;
     }
 
@@ -77,7 +84,7 @@ class IsometricDemo : public olc::PixelGameEngine
       {
         // Guard array boundary
         if (vSelected.x >= 0 && vSelected.x < vWorldSize.x && vSelected.y >= 0 && vSelected.y < vWorldSize.y)
-          ++pWorld[vSelected.y * vWorldSize.x + vSelected.x] %= 6;
+          ++pWorld[vSelected.y * vWorldSize.x + vSelected.x];
       }
 
       // Labmda function to convert "world" coordinate into screen space
@@ -86,7 +93,7 @@ class IsometricDemo : public olc::PixelGameEngine
         return olc::vi2d
         {
           (vOrigin.x * vTileSize.x) + (x - y) * (vTileSize.x / 2),
-          (vOrigin.y * vTileSize.y) + (x + y) * (vTileSize.y / 2)
+          (vOrigin.y * vTileSize.y - vTileSize.y) + (x + y) * (vTileSize.y / 2)
         };
       };
 
@@ -103,8 +110,9 @@ class IsometricDemo : public olc::PixelGameEngine
           olc::vi2d vWorld = ToScreen(x, y);
           int index = pWorld[y*vWorldSize.x + x];
 
-          DrawPartialSprite(vWorld.x, vWorld.y, sprIsom, index * vTileSize.x, 0 * vTileSize.y, vTileSize.x, vTileSize.y * 2);
-          // DrawString(4, 34 + 10*(y*10 + x), "(" + std::to_string(x) + ", " + std::to_string(y) + "): " + std::to_string(index), olc::BLACK);
+          // Draw tile by index
+          // DrawPartialSprite(vWorld.x, vWorld.y, sprIsom, index * vTileSize.x % sprIsom->width, ((index / tilesPerRow ) * vTileSize.y * 2) % sprIsom->height, vTileSize.x, vTileSize.y * 2);
+          DrawPartialSprite(vWorld.x, vWorld.y, sprIsom, index * vTileSize.x % sprIsom->width, 0, vTileSize.x, vTileSize.y * 2);
         }
       }
 
@@ -115,7 +123,7 @@ class IsometricDemo : public olc::PixelGameEngine
       olc::vi2d vSelectedWorld = ToScreen(vSelected.x, vSelected.y);
 
       // Draw "highlight" tile
-      DrawPartialSprite(vSelectedWorld.x, vSelectedWorld.y, sprIsom, 0 * vTileSize.x, 0, vTileSize.x, vTileSize.y);
+      DrawPartialSprite(vSelectedWorld.x, vSelectedWorld.y + vTileSize.y, colorCheat, 0 * vTileSize.x, 0, vTileSize.x, vTileSize.y);
 
       // Go back to normal drawing with no expected transparency
       SetPixelMode(olc::Pixel::NORMAL);
