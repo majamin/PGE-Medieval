@@ -28,7 +28,11 @@ class IsometricDemo : public olc::PixelGameEngine
     int *pWorld = nullptr;
 
     // NOTE: used in calculation to select tiles
+    int tilesMax = 80;
     int tilesPerRow;
+
+    //
+    int paintSelection = 0;
 
   public:
     bool OnUserCreate() override
@@ -84,8 +88,11 @@ class IsometricDemo : public olc::PixelGameEngine
       {
         // Guard array boundary
         if (vSelected.x >= 0 && vSelected.x < vWorldSize.x && vSelected.y >= 0 && vSelected.y < vWorldSize.y)
-          ++pWorld[vSelected.y * vWorldSize.x + vSelected.x];
+          pWorld[vSelected.y * vWorldSize.x + vSelected.x] = paintSelection;
       }
+
+      if (GetMouseWheel() > 0) paintSelection = (++paintSelection) % tilesMax;
+      if (GetMouseWheel() < 0) paintSelection = std::max(0, --paintSelection) % tilesMax;
 
       // Labmda function to convert "world" coordinate into screen space
       auto ToScreen = [&](int x, int y)
@@ -100,6 +107,9 @@ class IsometricDemo : public olc::PixelGameEngine
       // Draw World - has binary transparancy so enable masking
       SetPixelMode(olc::Pixel::MASK);
 
+      // Convert selected cell coordinate to world space
+      olc::vi2d vSelectedWorld = ToScreen(vSelected.x, vSelected.y);
+
       // (0,0) is at top, defined by vOrigin, so draw from top to bottom
       // to ensure tiles closest to camera are drawn last
       for (int y = 0; y < vWorldSize.y; y++)
@@ -110,20 +120,17 @@ class IsometricDemo : public olc::PixelGameEngine
           olc::vi2d vWorld = ToScreen(x, y);
           int index = pWorld[y*vWorldSize.x + x];
 
-          // Draw tile by index
-          // DrawPartialSprite(vWorld.x, vWorld.y, sprIsom, index * vTileSize.x % sprIsom->width, ((index / tilesPerRow ) * vTileSize.y * 2) % sprIsom->height, vTileSize.x, vTileSize.y * 2);
-          DrawPartialSprite(vWorld.x, vWorld.y, sprIsom, index * vTileSize.x % sprIsom->width, 0, vTileSize.x, vTileSize.y * 2);
+          if (x == vSelected.x && y == vSelected.y)
+            // Draw cursor
+            DrawPartialSprite(vSelectedWorld.x, vSelectedWorld.y, sprIsom, paintSelection * vTileSize.x % sprIsom->width, ((paintSelection / tilesPerRow ) * vTileSize.y * 2) % sprIsom->height, vTileSize.x, vTileSize.y * 2);
+          else
+            // Normal tile
+            DrawPartialSprite(vWorld.x, vWorld.y, sprIsom, index * vTileSize.x % sprIsom->width, ((index / tilesPerRow ) * vTileSize.y * 2) % sprIsom->height, vTileSize.x, vTileSize.y * 2);
         }
       }
 
       // Draw Selected Cell - Has varying alpha components
       SetPixelMode(olc::Pixel::ALPHA);
-
-      // Convert selected cell coordinate to world space
-      olc::vi2d vSelectedWorld = ToScreen(vSelected.x, vSelected.y);
-
-      // Draw "highlight" tile
-      DrawPartialSprite(vSelectedWorld.x, vSelectedWorld.y + vTileSize.y, colorCheat, 0 * vTileSize.x, 0, vTileSize.x, vTileSize.y);
 
       // Go back to normal drawing with no expected transparency
       SetPixelMode(olc::Pixel::NORMAL);
