@@ -22,6 +22,7 @@ class IsometricDemo : public olc::PixelGameEngine
 
     // Sprite that holds all imagery
     olc::Sprite *sprIsom = nullptr;
+    olc::Sprite *sprIsomSelected = nullptr;
     olc::Sprite *colorCheat = nullptr;
 
     // Pointer to create 2D world array
@@ -39,6 +40,7 @@ class IsometricDemo : public olc::PixelGameEngine
     {
       // Load sprites used in demonstration
       sprIsom = new olc::Sprite("./assets/iso-64x64-building_2.png");
+      sprIsomSelected = new olc::Sprite("./assets/iso-64x64-building-standout.png");
       colorCheat = new olc::Sprite("./assets/color_cheat.png");
 
       // NOTE: An array can't be entirely initialized with a non-zero value.
@@ -122,7 +124,7 @@ class IsometricDemo : public olc::PixelGameEngine
 
           if (x == vSelected.x && y == vSelected.y)
             // Draw cursor
-            DrawPartialSprite(vSelectedWorld.x, vSelectedWorld.y, sprIsom, paintSelection * vTileSize.x % sprIsom->width, ((paintSelection / tilesPerRow ) * vTileSize.y * 2) % sprIsom->height, vTileSize.x, vTileSize.y * 2);
+            DrawPartialSprite(vSelectedWorld.x, vSelectedWorld.y, sprIsomSelected, paintSelection * vTileSize.x % sprIsomSelected->width, ((paintSelection / tilesPerRow ) * vTileSize.y * 2) % sprIsomSelected->height, vTileSize.x, vTileSize.y * 2);
           else
             // Normal tile
             DrawPartialSprite(vWorld.x, vWorld.y, sprIsom, index * vTileSize.x % sprIsom->width, ((index / tilesPerRow ) * vTileSize.y * 2) % sprIsom->height, vTileSize.x, vTileSize.y * 2);
