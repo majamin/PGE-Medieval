@@ -60,6 +60,16 @@ class IsometricDemo : public olc::PixelGameEngine
     {
       Clear(olc::WHITE);
 
+      // Labmda function to convert "world" coordinate into screen space
+      auto ToScreen = [&](int x, int y)
+      {
+        return olc::vi2d
+        {
+          (vOrigin.x * vTileSize.x) + (x - y) * (vTileSize.x / 2),
+          (vOrigin.y * vTileSize.y - vTileSize.y) + (x + y) * (vTileSize.y / 2)
+        };
+      };
+
       // Get Mouse in world
       olc::vi2d vMouse = { GetMouseX(), GetMouseY() };
 
@@ -96,15 +106,10 @@ class IsometricDemo : public olc::PixelGameEngine
       if (GetMouseWheel() > 0) paintSelection = (++paintSelection) % tilesMax;
       if (GetMouseWheel() < 0) paintSelection = std::max(0, --paintSelection) % tilesMax;
 
-      // Labmda function to convert "world" coordinate into screen space
-      auto ToScreen = [&](int x, int y)
-      {
-        return olc::vi2d
-        {
-          (vOrigin.x * vTileSize.x) + (x - y) * (vTileSize.x / 2),
-          (vOrigin.y * vTileSize.y - vTileSize.y) + (x + y) * (vTileSize.y / 2)
-        };
-      };
+      if (GetKey(olc::W).bPressed) vOrigin.y += 1;
+      if (GetKey(olc::S).bPressed) vOrigin.y -= 1;
+      if (GetKey(olc::A).bPressed) vOrigin.x += 1;
+      if (GetKey(olc::D).bPressed) vOrigin.x -= 1;
 
       // Draw World - has binary transparancy so enable masking
       SetPixelMode(olc::Pixel::MASK);
@@ -144,6 +149,7 @@ class IsometricDemo : public olc::PixelGameEngine
       DrawString(4, 4, "Mouse   : " + std::to_string(vMouse.x) + ", " + std::to_string(vMouse.y), olc::BLACK);
       DrawString(4, 14, "Cell    : " + std::to_string(vCell.x) + ", " + std::to_string(vCell.y), olc::BLACK);
       DrawString(4, 24, "Selected: " + std::to_string(vSelected.x) + ", " + std::to_string(vSelected.y), olc::BLACK);
+      // DrawString(4, 34, "Origin  : " + std::to_string(vOrigin.x) + ", " + std::to_string(vOrigin.y), olc::BLACK);
       return true;
     }
 };
