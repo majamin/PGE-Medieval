@@ -1,6 +1,10 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 
+// Window size
+int wWidth = 512;
+int wHeight = 480;
+
 // Override base class with your custom functionality
 class IsometricDemo : public olc::PixelGameEngine
 {
@@ -23,6 +27,8 @@ class IsometricDemo : public olc::PixelGameEngine
     // Sprite that holds all imagery
     olc::Sprite *sprIsom = nullptr;
     olc::Sprite *sprIsomSelected = nullptr;
+    olc::Sprite *sprIsomThumb = nullptr;
+    olc::Sprite *sprIsomThumbHighlight = nullptr;
     olc::Sprite *colorCheat = nullptr;
 
     // Pointer to create 2D world array
@@ -41,6 +47,8 @@ class IsometricDemo : public olc::PixelGameEngine
       // Load sprites used in demonstration
       sprIsom = new olc::Sprite("./assets/iso-64x64-building_2.png");
       sprIsomSelected = new olc::Sprite("./assets/iso-64x64-building-standout.png");
+      sprIsomThumb = new olc::Sprite("./assets/iso-64x64-building_thumbnail.png");
+      sprIsomThumbHighlight = new olc::Sprite("./assets/thumb_selected.png");
       colorCheat = new olc::Sprite("./assets/color_cheat.png");
 
       // NOTE: An array can't be entirely initialized with a non-zero value.
@@ -136,6 +144,10 @@ class IsometricDemo : public olc::PixelGameEngine
         }
       }
 
+      // Draw thumbnail
+      DrawPartialSprite(wWidth - sprIsomThumb->width, 0, sprIsomThumb, 0, ((paintSelection / (tilesPerRow * 2) ) * 24 * 2) % sprIsomThumb->height, sprIsomThumb->width, 24*2);
+      DrawPartialSprite(wWidth - sprIsomThumb->width + paintSelection * 24 % sprIsomThumb->width, ((paintSelection / tilesPerRow) * 24) % (24 * 2), sprIsomThumbHighlight, 0, 0, 24, 24);
+
       // Draw Selected Cell - Has varying alpha components
       SetPixelMode(olc::Pixel::ALPHA);
 
@@ -158,7 +170,7 @@ class IsometricDemo : public olc::PixelGameEngine
 int main()
 {
   IsometricDemo demo;
-  if (demo.Construct(512, 480, 2, 2))
+  if (demo.Construct(wWidth, wHeight, 2, 2))
     demo.Start();
   return 0;
 }
